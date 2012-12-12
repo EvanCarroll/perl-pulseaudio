@@ -7,6 +7,10 @@ license  'perl';
 
 build_requires 'Test::More';
 
+requires 'Moose' => '2.0';
+requires 'IPC::Run3';
+requires 'MooseX::Types';
+
 auto_install;
 
 WriteAll;
