@@ -1,8 +1,23 @@
 package PulseAudio;
-
-use 5.006;
 use strict;
 use warnings;
+
+use Moose;
+
+with 'PulseAudio::Backend::Utilities';
+
+has 'pulse_server' => (
+	isa => 'Maybe[Str]'
+	, is => 'ro'
+	, required => 0
+);
+
+our $VERSION = '0.01_01';
+
+__PACKAGE__->meta->make_immutable;
+
+
+__END__
 
 =head1 NAME
 
@@ -10,56 +25,44 @@ PulseAudio - The great new PulseAudio!
 
 =head1 VERSION
 
-Version 0.01
+Version 0.01_01
 
-=cut
+=head1 DESCRIPTION
 
-our $VERSION = '0.01';
-
+This is a suite of tools that should make scripting PulseAudio simplier. Please
+see further docs in L<PulseAudio::Backend::Utilities>, L<PulseAudio::Sink>,
+L<PulseAudio::Source>.
 
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
+This module provides an object oriented interface into the Pulse configuration L<pacmd>.
 
-Perhaps a little code snippet.
+	use PulseAudio;
+	my $pa = PulseAudio->new;
 
-    use PulseAudio;
+	my $pa = PulseAudio->new( pulse_server => '192.168.1.102' );
 
-    my $foo = PulseAudio->new();
-    ...
+	## We because the absolute location of the key is {properties}{device.bus_path}
+	my $sink = $pa->get_sinks_by( ['properties', 'device.bus_path'], 'pci-0000:00:1b.0' )
 
-=head1 EXPORT
+	# Execute VLC with the B<PULSE_SINK> environmental variable set the sink's index.
+	$sink->exec( vlc );
 
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
+	# Set the sinks's volume
+	$sink->set_sink_volume( 0x10000 ); # Sets volume to max;
+	$sink->set_sink_volume( 'MAX' ); # Sets volume to max;
 
-=head1 SUBROUTINES/METHODS
+=head1 SEE ALSO
 
-=head2 function1
+=over 4
 
-=cut
+=item L<PulseAudio::Backend::Utilities>
 
-sub function1 {
-}
+=item L<PulseAudio::Sink>
 
-=head2 function2
+=item L<PulseAudio::Source>
 
-=cut
-
-sub function2 {
-}
-
-=head1 AUTHOR
-
-Evan Carroll, C<< <me at evancarroll.com> >>
-
-=head1 BUGS
-
-Please report any bugs or feature requests to C<bug-pulseaudio at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=PulseAudio>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
-
-
+=back
 
 
 =head1 SUPPORT
