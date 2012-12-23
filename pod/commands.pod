@@ -36,7 +36,6 @@ All listing functional is done by the L<PulseAudio::Backend::Utilities> module. 
 
 =back
 
-
 =head2 Sink
 
 All of these are supported by L<PulseAudio::Sink>.
@@ -47,23 +46,13 @@ All of these are supported by L<PulseAudio::Sink>.
 
 =item    set-sink-mute                   Set the mute switch of a sink (args: index|name, bool)
 
-=item    set-sink-input-volume           Set the volume of a sink input (args: index, volume)
-
-=item    set-sink-input-mute             Set the mute switch of a sink input (args: index, bool)
-
 =item    set-default-sink                Set the default sink (args: index|name)
 
 =item    set-sink-port                   Change the port of a sink (args: index|name, port-name)
 
 =item    suspend-sink                    Suspend sink (args: index|name, bool)
 
-=item    move-sink-input                 Move sink input to another sink (args: index, sink)
-
 =item    update-sink-proplist            Update the properties of a sink (args: index|name, properties)
-
-=item    update-sink-input-proplist      Update the properties of a sink input (args: index, properties)
-
-=item    kill-sink-input                 Kill a sink input (args: index)
 
 =item    play-sample                     Play a sample from the sample cache (args: name, sink|index)
 
@@ -71,6 +60,23 @@ All of these are supported by L<PulseAudio::Sink>.
 
 =back
 
+=head2 Sink Input
+
+All of these are supported by L<PulseAudio::SinkInput>.
+
+=over 4
+
+=item    set-sink-input-volume           Set the volume of a sink input (args: index, volume)
+
+=item    set-sink-input-mute             Set the mute switch of a sink input (args: index, bool)
+
+=item    move-sink-input                 Move sink input to another sink (args: index, sink)
+
+=item    update-sink-input-proplist      Update the properties of a sink input (args: index, properties)
+
+=item    kill-sink-input                 Kill a sink input (args: index)
+
+=back
 
 =head2 Source
 
@@ -82,19 +88,27 @@ All of these are supported by L<PulseAudio::Source>.
 
 =item    set-source-mute                 Set the mute switch of a source (args: index|name, bool)
 
-=item    set-source-output-volume        Set the volume of a source output (args: index, volume)
-
-=item    set-source-output-mute          Set the mute switch of a source output (args: index, bool)
-
 =item    set-default-source              Set the default source (args: index|name)
 
 =item    set-source-port                 Change the port of a source (args: index|name, port-name)
 
 =item    suspend-source                  Suspend source (args: index|name, bool)
 
-=item    move-source-output              Move source output to another source (args: index, source)
-
 =item    update-source-proplist          Update the properties of a source (args: index|name, properties)
+
+=back
+
+=head2 Source Output
+
+All of these are supported by L<PulseAudio::SourceOutput>.
+
+=over 4
+
+=item    set-source-output-volume        Set the volume of a source output (args: index, volume)
+
+=item    set-source-output-mute          Set the mute switch of a source output (args: index, bool)
+
+=item    move-source-output              Move source output to another source (args: index, source)
 
 =item    update-source-output-proplist   Update the properties of a source output (args: index, properties)
 
@@ -106,6 +120,8 @@ All of these are supported by L<PulseAudio::Source>.
 
 All of these are supported by L<PulseAudio::Card>.
 
+=over 4
+
 =item    set-card-profile                Change the profile of a card (args: index|name, profile-name)
 
 =back
@@ -115,7 +131,6 @@ All of these are supported by L<PulseAudio::Card>.
 None of these commands are supported
 
 =over 12
-
 
 =item    list-samples                    List all entries in the sample cache
 
