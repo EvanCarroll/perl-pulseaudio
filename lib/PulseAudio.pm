@@ -3,6 +3,7 @@ use strict;
 use warnings;
 
 use Moose;
+use v5.10;
 
 with 'PulseAudio::Backend::Utilities';
 
