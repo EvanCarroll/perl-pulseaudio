@@ -25,7 +25,7 @@ sub _commands {
 sub exec {
 	my ( $self, $prog, @args ) = @_; 
 	local $ENV{PATH} = undef;
-	my $env_args = join ' ', grep defined, (
+	my @env_args = grep defined, (
 		(
 			$self->server->_has_pulse_server
 			? sprintf("PULSE_SERVER=%s", $self->server->pulse_server)
@@ -35,7 +35,7 @@ sub exec {
 	);
 	system(
 		'/usr/bin/env'
-		, $env_args
+		, @env_args
 		, $prog
 		, @args
 	);

@@ -48,7 +48,7 @@ foreach my $name ( qw/card source source_output sink sink_input module client/ )
 			my $self = shift;
 			my %db;
 			while ( my ($idx, $data) = each %{$self->get_raw('cache_entrie')} ) {
-				$db{$idx} = PulseAudio::Sample->new({ name => $idx, dump => $data, sever => $self });
+				$db{$idx} = PulseAudio::Sample->new({ name => $idx, dump => $data, server => $self });
 			}
 			\%db;
 		}
