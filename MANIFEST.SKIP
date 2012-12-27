@@ -1,6 +1,7 @@
 blib/
 .gitignore
-Makefile
+Makefile$
+MYMETA*
 Makefile.old
 Build
 Build.bat
