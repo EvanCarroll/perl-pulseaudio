@@ -16,3 +16,4 @@ pod2htm*.tmp
 \.SKIP$
 ignore\.txt
 \.swp$
+pm_to_blib
