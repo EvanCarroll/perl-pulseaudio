@@ -449,7 +449,7 @@ The result of the parsing is accessable by the B<__pacmd_help> function.
 
 It provides the data that is used to initialize the appropriate objects for your system, and further provides the data returned with the L<Commands/LISTING> commands.
 
-The result of this parsing is stored in the B<info> method.
+The result of this parsing is stored in the B<info> attribute.
 
 =back
 
