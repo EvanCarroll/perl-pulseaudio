@@ -29,6 +29,7 @@ my %pacmd = (
 		describe-module
 		suspend
 		set-log-level
+		set-log-target
 		set-log-meta
 		set-log-time
 		set-log-backtrace
@@ -80,6 +81,7 @@ my %pacmd = (
 	/]
 	, 'PulseAudio::Card' => [qw/
 		set-card-profile
+		set-port-latency-offset
 	/]
 	, 'PulseAudio::Client' => [qw/
 		kill-client
@@ -97,7 +99,7 @@ my %pacmd = (
 while ( my ( $module, $methods ) = each %pacmd ) {
 	my @method_list = $module->meta->get_all_method_names;
 
-	subtest "$module includes methods and test coverage" => sub {
+	subtest "[$module] includes methods and test coverage" => sub {
 	
 		subtest "[$module] API (inclues methods)" => sub {
 			plan tests => scalar @{$methods};

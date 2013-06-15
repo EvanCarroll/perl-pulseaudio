@@ -89,6 +89,7 @@ sub _pacmd_help {
 	my %db;
 
 	while ( my $line = $fh->getline ) {
+
 		chomp $line;
 		next unless $line =~ /^ \s+ ([a-z-]+) \s+ (.*)/x;
 		my ( $name, $desc ) = ( $1, $2 );
@@ -115,7 +116,7 @@ sub _pacmd_help {
 			when ( qr/^(?:suspend|exit)$/ ) {
 				@cat = ('misc');
 			}
-			when ( qr/card/ )        { push @cat, 'card'; continue; }
+			when ( qr/card|set-port-latency-offset/ )        { push @cat, 'card'; continue; }
 			when ( qr/client/ )      { push @cat, 'client'; continue; }
 			when ( qr/module/ )      { push @cat, 'module'; continue; }
 			when ( qr/sample/ )      { push @cat, 'sample'; continue; }
@@ -230,6 +231,17 @@ has 'info' => (
 
 		my %db;
 		while ( my $line = $fh->getline ) {
+
+		next if $line =~ /(?:
+			Speakers
+			| Headphones
+			| Internal Microphone
+			| Dock Microphone
+			| Microphone
+			| Speakers
+			| (?-x:HDMI \/ DisplayPort(?-x: \d)?)
+		) \s \(priority
+		/x;
 			chomp $line;
 			state ( $idx, $cat, $last_key );
 			state @tree_pos;
