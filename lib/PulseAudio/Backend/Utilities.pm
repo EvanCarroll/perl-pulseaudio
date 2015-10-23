@@ -10,13 +10,14 @@ use PulseAudio::Types qw();
 use autodie;
 use IPC::Run3;
 
-use Data::Dumper;
 our $_command_db;
 
 foreach my $name ( qw/card source source_output sink sink_input module client/ ) {
-	my $attr = $name . 's';
-	my $module = 'PulseAudio::' . ucfirst( lc $name );
-	
+    my $attr = $name . 's';
+    my @parts = split(/_/, $name);
+    foreach (@parts) { $_ = ucfirst; };
+    my $module = 'PulseAudio::' . join('', @parts );
+
 	has ( $attr, (
 		isa       => 'HashRef'
 		, is      => 'ro'
@@ -26,7 +27,9 @@ foreach my $name ( qw/card source source_output sink sink_input module client/ )
 		, default => sub {
 			my $self = shift;
 			my %db;
-			while ( my ($idx, $data) = each %{$self->get_raw($name)} ) {
+
+			while ( defined $self->get_raw($name) and
+                                (my ($idx, $data) = each %{$self->get_raw($name)}) ) {
 				$db{$idx} = $module->new({ index => $idx, dump => $data, server => $self });
 			}
 			\%db;
