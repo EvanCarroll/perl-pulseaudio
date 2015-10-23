@@ -10,6 +10,7 @@ use PulseAudio::Types qw();
 use autodie;
 use IPC::Run3;
 
+use Data::Dumper;
 our $_command_db;
 
 foreach my $name ( qw/card source source_output sink sink_input module client/ ) {
@@ -232,16 +233,9 @@ has 'info' => (
 		my %db;
 		while ( my $line = $fh->getline ) {
 
-		next if $line =~ /(?:
-			Speakers
-			| Headphones
-			| Internal Microphone
-			| Dock Microphone
-			| Microphone
-			| Speakers
-			| (?-x:HDMI \/ DisplayPort(?-x: \d)?)
-		) \s \(priority
-		/x;
+		        # a little information lost in "ports:" section
+		        next if $line =~ /device\.icon_name/;
+
 			chomp $line;
 			state ( $idx, $cat, $last_key );
 			state @tree_pos;
@@ -278,10 +272,7 @@ has 'info' => (
 					}
 					else {
 						my $x = \%{ $db{$cat}{$idx} };
-						my $level = 0;
-						while ( $level + 1 < @tree_pos ) {
-							$x = \%{ $x->{ $tree_pos[$level++]->{key} } };
-						}
+					        $x = \%{ $x->{ $tree_pos[0]->{key} } };
 						$x->{$k} = $v;
 					}
 					$last_key = $k;
