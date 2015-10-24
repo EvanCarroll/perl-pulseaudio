@@ -13,15 +13,13 @@ use IPC::Run3;
 our $_command_db;
 
 foreach my $name ( qw/card source source_output sink sink_input module client/ ) {
-    my $attr = $name . 's';
-    my @parts = split(/_/, $name);
-    foreach (@parts) { $_ = ucfirst; };
-    my $module = 'PulseAudio::' . join('', @parts );
+	my $attr = $name . 's';
+	my $module = 'PulseAudio::' . join("", map(ucfirst, split(/_/, $name)));
 
 	has ( $attr, (
-		isa       => 'HashRef'
-		, is      => 'ro'
-		, lazy    => 1
+		isa	  => 'HashRef'
+		, is	  => 'ro'
+		, lazy	  => 1
 		, traits  => ['Hash']
 		, handles  => { sprintf( 'get_%s_by_index', $name ) => 'get' }
 		, default => sub {
@@ -29,7 +27,7 @@ foreach my $name ( qw/card source source_output sink sink_input module client/ )
 			my %db;
 
 			while ( defined $self->get_raw($name) and
-                                (my ($idx, $data) = each %{$self->get_raw($name)}) ) {
+				(my ($idx, $data) = each %{$self->get_raw($name)}) ) {
 				$db{$idx} = $module->new({ index => $idx, dump => $data, server => $self });
 			}
 			\%db;
