@@ -14,18 +14,20 @@ our $_command_db;
 
 foreach my $name ( qw/card source source_output sink sink_input module client/ ) {
 	my $attr = $name . 's';
-	my $module = 'PulseAudio::' . ucfirst( lc $name );
-	
+	my $module = 'PulseAudio::' . join("", map(ucfirst, split(/_/, $name)));
+
 	has ( $attr, (
-		isa       => 'HashRef'
-		, is      => 'ro'
-		, lazy    => 1
+		isa	  => 'HashRef'
+		, is	  => 'ro'
+		, lazy	  => 1
 		, traits  => ['Hash']
 		, handles  => { sprintf( 'get_%s_by_index', $name ) => 'get' }
 		, default => sub {
 			my $self = shift;
 			my %db;
-			while ( my ($idx, $data) = each %{$self->get_raw($name)} ) {
+
+			while ( defined $self->get_raw($name) and
+				(my ($idx, $data) = each %{$self->get_raw($name)}) ) {
 				$db{$idx} = $module->new({ index => $idx, dump => $data, server => $self });
 			}
 			\%db;
@@ -232,16 +234,9 @@ has 'info' => (
 		my %db;
 		while ( my $line = $fh->getline ) {
 
-		next if $line =~ /(?:
-			Speakers
-			| Headphones
-			| Internal Microphone
-			| Dock Microphone
-			| Microphone
-			| Speakers
-			| (?-x:HDMI \/ DisplayPort(?-x: \d)?)
-		) \s \(priority
-		/x;
+		        # a little information lost in "ports:" section
+		        next if $line =~ /device\.icon_name/;
+
 			chomp $line;
 			state ( $idx, $cat, $last_key );
 			state @tree_pos;
@@ -278,10 +273,7 @@ has 'info' => (
 					}
 					else {
 						my $x = \%{ $db{$cat}{$idx} };
-						my $level = 0;
-						while ( $level + 1 < @tree_pos ) {
-							$x = \%{ $x->{ $tree_pos[$level++]->{key} } };
-						}
+					        $x = \%{ $x->{ $tree_pos[0]->{key} } };
 						$x->{$k} = $v;
 					}
 					$last_key = $k;
