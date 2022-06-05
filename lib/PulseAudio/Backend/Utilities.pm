@@ -441,7 +441,8 @@ sub __generate_get_by_method {
 					my $v;
 					$v = $obj->_dump;
 					$v = $v->{$_} for @$loc;
-					next OBJ unless $v ~~ $value;
+					#next OBJ unless $v ~~ $value;
+					next OBJ unless $v eq $value;
 				}
 				return $obj;
 			}
