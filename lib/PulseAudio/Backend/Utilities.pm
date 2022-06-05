@@ -285,7 +285,23 @@ has 'info' => (
 						my $x = \%{ $db{$cat}{$idx} };
 						my $level = 0;
 						while ( $level + 1 < @tree_pos ) {
-							$x = \%{ $x->{ $tree_pos[$level++]->{key} } };
+							# If we reach a string but still have values, we have something like
+                            # analog-output-lineout: Line Out (priority 9000, latency offset 0 usec, available: yes)
+                            #          properties:
+                            #                  device.icon_name = "audio-headphones"
+                            # So we remove the name and lose it
+                            # Maybe we should later move it down later
+                            my $h = $tree_pos[$level++]->{key};
+                            if(     $h
+                                and exists $x->{ $h }
+								and ! ref $x->{ $h } ) {
+									my $v = $x->{ $h };
+									#say "Whoops: $v is not a ref, ignoring/fixing";
+									$x->{ $h } = {};
+							};
+							if( $h ) {
+								$x = \%{ $x->{ $h } };
+							};
 						}
 						$x->{$k} = $v;
 					}
