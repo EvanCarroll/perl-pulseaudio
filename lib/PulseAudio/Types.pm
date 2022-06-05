@@ -29,7 +29,7 @@ coerce PA_Bool
 			elsif ( /off/i )   { $arg = 0 }
 			elsif ( /^[ty]/i ) { $arg = 1 }
 			elsif ( /^[fn]/i ) { $arg = 0 }
-			else  { $_ }
+			#else  { $_ }
 		};
 		$arg;
 	}
