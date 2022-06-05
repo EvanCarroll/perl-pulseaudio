@@ -2,6 +2,7 @@ package PulseAudio::Backend::Utilities;
 use strict;
 use warnings;
 use feature ':5.14';
+use List::Util 'any';
 
 use Moose::Role;
 
@@ -15,7 +16,7 @@ our $_command_db;
 foreach my $name ( qw/card source source_output sink sink_input module client/ ) {
 	my $attr = $name . 's';
 	my $module = 'PulseAudio::' . ucfirst( lc $name );
-	
+
 	has ( $attr, (
 		isa       => 'HashRef'
 		, is      => 'ro'
@@ -65,14 +66,15 @@ has 'defaults' => (
 		my $self = shift;
 		my %db;
 		while ( my ($k,$v) = each %{$self->get_raw('default')} ) {
-			given ( $k ) {
-				when ( qr/sink/ ) {
+			local $_ =  $k; do { if(0) {
+				}
+				elsif ( /sink/ ) {
 					$db{sink} = $self->get_sink_by(['name'] => $v);
 				}
-				when ( qr/source/ ) {
+				elsif ( /source/ ) {
 					$db{source} = $self->get_source_by(['name'] => $v);
 				}
-				default {
+				else {
 					$db{$k} = $v
 				}
 			}
@@ -107,33 +109,36 @@ sub _pacmd_help {
 		## Some commands can be trigger on two modules
 		## like play-sample ( sample-name, sink )
 		my @cat;
-		given ( $name ) {
-			when ( qr/(?<!un)load/ )        { @cat = ('load') }
-			when ( qr/^list|stat|info/ )    { @cat = ('list') }
-			when ( qr/dump|help|shared|describe-|set-log-/ ) {
+		local $_ =  $name; do { if(0) {}
+			elsif ( /(?<!un)load/ )        { @cat = ('load') }
+			elsif ( /^list|stat|info/ )    { @cat = ('list') }
+			elsif ( /dump|help|shared|describe-|set-log-/ ) {
 				@cat = ('unsupported');
 			}
-			when ( qr/^(?:suspend|exit)$/ ) {
+			elsif ( /^(?:suspend|exit)$/ ) {
 				@cat = ('misc');
 			}
-			when ( qr/card|set-port-latency-offset/ )        { push @cat, 'card'; continue; }
-			when ( qr/client/ )      { push @cat, 'client'; continue; }
-			when ( qr/module/ )      { push @cat, 'module'; continue; }
-			when ( qr/sample/ )      { push @cat, 'sample'; continue; }
-			when ( qr/source/ )      {
-				push @cat, ( $name =~ qr/output/ ? 'source_output' : 'source' );
-				continue;
+			else {
+				if( 0 ) {}
+				elsif ( /card|set-port-latency-offset/ )        { push @cat, 'card'; }
+				else {
+				    if ( /client/ )      { push @cat, 'client'; }
+				    if ( /module/ )      { push @cat, 'module'; }
+				    if ( /sample/ )      { push @cat, 'sample'; }
+				    if ( /source/ )      {
+				    	push @cat, ( $name =~ qr/output/ ? 'source_output' : 'source' );
+				    }
+				    if ( /sink|play/ )   {
+				    	push @cat, ( $name =~ qr/input/ ? 'sink_input' : 'sink' );
+				    }
+				    die "No category for $name" unless @cat;
+				}
 			}
-			when ( qr/sink|play/ )   {
-				push @cat, ( $name =~ qr/input/ ? 'sink_input' : 'sink' );
-				continue;
-			}
-			default { die "No category for $name" unless @cat; }
 		};
 
 		## Generate the subs for attachment to classes
 		my $sub;
-		if ( 'list' ~~ @cat ) {
+		if ( any { $_ eq 'list' } @cat ) {
 			my $key = $alias;
 			if ( $alias =~ qr/list[-_](.*)s/ ) {
 				$key = $1;
@@ -151,7 +156,7 @@ sub _pacmd_help {
 			};
 
 		}
-		elsif ( @func_sig && $func_sig[0] ~~ qr/index/ ) {
+		elsif ( @func_sig && $func_sig[0] =~ qr/index/ ) {
 			$sub = sub {
 				my ( $self, @args ) = @_;
 				unshift @args, $self;
@@ -160,7 +165,7 @@ sub _pacmd_help {
 				$self;
 			}
 		}
-		elsif ( @func_sig && $func_sig[-1] ~~ qr/index/ ) {
+		elsif ( @func_sig && $func_sig[-1] =~ qr/index/ ) {
 			$sub = sub {
 				my ( $self, @args ) = @_;
 				push @args, $self;
@@ -170,7 +175,7 @@ sub _pacmd_help {
 			}
 		}
 		elsif (
-			@func_sig == 1 && $func_sig[0] ~~ 'name'
+			@func_sig == 1 && $func_sig[0] =~ 'name'
 			or ( @cat == 1 and $cat[0] eq 'load' || $cat[0] eq 'misc' )
 		) {
 			$sub = sub {
@@ -184,9 +189,9 @@ sub _pacmd_help {
 			$sub = sub { die "[Function $name, alias $alias] Not supported\n" };
 		}
 		else {
-			die "$line [@cat] is not supported, no idea of how to generate method\n"
+			die "$line [".@cat."] is not supported, no idea of how to generate method\n"
 		}
-		
+
 		my $cmd = $db{commands}{$alias} = {
 			desc => $desc
 			, args => @func_sig?\@func_sig:undef
@@ -268,7 +273,7 @@ has 'info' => (
 			elsif ( $line =~ qr/^(\t+) ([^\s][^:=]+) \s* [:=] \s* <? ([^>]+)? /x ) {
 				my ($k, $v) = ($2, $3);
 				s/^"|^\s+|\s+$|"$//g for grep defined, $k, $v;
-				
+
 				$#tree_pos = ( (length $1) - 1 );
 				$tree_pos[ -1 ] = { key => $k, value => $v };
 
@@ -287,7 +292,7 @@ has 'info' => (
 					$last_key = $k;
 				}
 			}
-			## hanging data, this means effectively that it is of a fixed width format	
+			## hanging data, this means effectively that it is of a fixed width format
 			elsif ( $line =~ qr/^ \t+ \s* ([^\s].*)/x ){
 				my $data = $1 =~ s/^\s+|\s+$//g;
 				my $x = \%{ $db{$cat}{$idx} };
@@ -302,13 +307,13 @@ has 'info' => (
 					$x->{$last_key} = [ $x->{$last_key}, $1 ];
 				}
 			}
-			elsif ( $line =~ /\w/ && $line ~~ qr/memory|cache|welcome/i ) {
+			elsif ( $line =~ /\w/ && $line =~ qr/memory|cache|welcome/i ) {
 				push @{$db{stat}} , $line;
 			}
 			elsif ( $line =~ /\w/ && $line !~ qr/memory|cache|welcome/i ) {
 				warn "Unexpected line $line\n";
 			}
-			
+
 		}
 
 		close $fh;
@@ -348,35 +353,36 @@ sub _exec {
 ## tries to coerce the arguments to the types.
 sub _coerce_and_test_function_types {
 	my ( $argRef, $typeRef ) = @_;
-	
+
 	warn 'Not enough arguments passed'
 		if scalar @$argRef != scalar @$typeRef
 	;
-	
+
 	my $count = 0;
 	for ( @$argRef ) {
-		given ( $typeRef->[$count] ) {
-			when ( qr/index|sink|source/ ) {
+		local $_ =  $typeRef->[$count]; do { if(0) {
+			}
+			elsif ( /index|sink|source/ ) {
 				$argRef->[$count] = PulseAudio::Types::to_PA_Index($argRef->[$count])
 					unless PulseAudio::Types::is_PA_Index($argRef->[$count])
 				;
 			}
-			when ( 'name' ) {
+			elsif ( $_ eq 'name' ) {
 				$argRef->[$count] = PulseAudio::Types::to_PA_Name($argRef->[$count])
 					unless PulseAudio::Types::is_PA_Name($argRef->[$count])
 				;
 			}
-			when ( 'volume' ) {
+			elsif ( $_ eq 'volume' ) {
 				$argRef->[$count] = PulseAudio::Types::to_PA_Volume($argRef->[$count])
 					unless PulseAudio::Types::is_PA_Volume($argRef->[$count])
 				;
 			}
-			when ( 'bool' ) {
+			elsif ( $_ eq 'bool' ) {
 				$argRef->[$count] = PulseAudio::Types::to_PA_Bool($argRef->[$count])
 					unless PulseAudio::Types::is_PA_Bool($argRef->[$count])
 				;
 			}
-			when ( 'arguments' ) {
+			elsif ( $_ eq 'arguments' ) {
 				Carp::croak 'Invalid argument, not a string'
 					unless MooseX::Types::Moose::is_Str($argRef->[$count])
 				;
@@ -403,7 +409,7 @@ sub _commands {
 
 sub __generate_get_by_method {
 	my ($name, $attr) = @_;
-	
+
 	my $method_name = sprintf( 'get_%s_by', $name );
 
 	## This gets invoked like $pa->get_sink_by( [name] => 'foo' );

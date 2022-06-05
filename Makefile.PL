@@ -13,6 +13,7 @@ requires 'IPC::Run3';
 requires 'MooseX::Types';
 requires 'constant';
 requires 'autodie';
+requires 'List::Util';
 
 requires_external_bin 'pacmd';
 requires_external_bin 'env';

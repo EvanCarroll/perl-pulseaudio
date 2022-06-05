@@ -24,12 +24,12 @@ coerce PA_Bool
 	, from Str
 	, via {
 		my $arg;
-		given ( $_ ) {
-			when ( qr/on/i )    { $arg = 1 }
-			when ( qr/off/i )   { $arg = 0 }
-			when ( qr/^[ty]/i ) { $arg = 1 }
-			when ( qr/^[fn]/i ) { $arg = 0 }
-			default { $_ }
+		local $_ =  $_; do { if(0) {}
+			elsif ( /on/i )    { $arg = 1 }
+			elsif ( /off/i )   { $arg = 0 }
+			elsif ( /^[ty]/i ) { $arg = 1 }
+			elsif ( /^[fn]/i ) { $arg = 0 }
+			else  { $_ }
 		};
 		$arg;
 	}
@@ -58,19 +58,19 @@ coerce PA_Name
 coerce PA_Volume
 	, from Str , via {
 		my $ratio;
-		given ( $_ ) {
-			when ( 'MAX' )  { $ratio = FULL_VOLUME }
-			when ( 'HALF' ) { $ratio = 0.50 * FULL_VOLUME }
-			when ( 'MUTE' ) { $ratio = 0 }
-			when ( 'MIN' )  { $ratio = 0 }
-			when ( '' )     {
+		local $_ =  $_; do { if(0) {}
+			elsif ( $_ eq 'MAX' )  { $ratio = FULL_VOLUME }
+			elsif ( $_ eq 'HALF' ) { $ratio = 0.50 * FULL_VOLUME }
+			elsif ( $_ eq 'MUTE' ) { $ratio = 0 }
+			elsif ( $_ eq 'MIN' )  { $ratio = 0 }
+			elsif ( $_ eq '' )     {
 				local $Carp::CarpLevel = 4;
 				Carp::croak 'Invalid PA_Volume (empty string)'
 			}
-			when ( $_ =~ qr/^(\d+)[%]$/ ) {
+			elsif ( $_ =~ qr/^(\d+)[%]$/ ) {
 				$ratio = int($1/100 * FULL_VOLUME );
 			}
-		}
+		};
 		return $ratio;
 	}
 ;
