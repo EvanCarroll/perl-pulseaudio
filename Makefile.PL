@@ -1,3 +1,4 @@
+use lib '.';
 use inc::Module::Install;
 
 name     'PulseAudio';
@@ -12,11 +13,12 @@ requires 'IPC::Run3';
 requires 'MooseX::Types';
 requires 'constant';
 requires 'autodie';
+requires 'List::Util';
 
 requires_external_bin 'pacmd';
 requires_external_bin 'env';
 
-repository 'git://github.com/EvanCarroll/perl-pulseaudio.git';
+repository 'git:github.com/EvanCarroll/perl-pulseaudio.git';
 homepage 'https://github.com/EvanCarroll/perl-pulseaudio';
 
 auto_install;
