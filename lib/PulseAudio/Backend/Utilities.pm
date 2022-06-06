@@ -16,6 +16,7 @@ our $_command_db;
 foreach my $name ( qw/card source source_output sink sink_input module client/ ) {
 	my $attr = $name . 's';
 	my $module = 'PulseAudio::' . ucfirst( lc $name );
+	$module =~ s/_(\w)/\U$1/;
 
 	has ( $attr, (
 		isa       => 'HashRef'
